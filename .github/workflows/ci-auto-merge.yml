@@ -65,19 +65,16 @@ jobs:
     needs: [test, create-pr, auto-merge]
     runs-on: ubuntu-latest
     steps:
-      - name: Notify Slack of Merge Success
+      - name: Notify Discord of Success
         if: ${{ success() }}
-        uses: 8398a7/action-slack@v3
-        with:
-          status: success
-          fields: repo,message,commit,author
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      - name: Notify Slack of Merge Failure
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+          --data "{\"content\": \"CI workflow succeeded for commit: ${{ github.sha }}\"}" \
+          ${{ secrets.DISCORD_WEBHOOK_URL }}
+      - name: Notify Discord of Failure
         if: ${{ failure() }}
-        uses: 8398a7/action-slack@v3
-        with:
-          status: failure
-          fields: repo,message,commit,author
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+          --data "{\"content\": \"CI workflow failed for commit: ${{ github.sha }}\"}" \
+          ${{ secrets.DISCORD_WEBHOOK_URL }}
+
